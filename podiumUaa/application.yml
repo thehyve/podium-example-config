@@ -1,0 +1,114 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration will be overriden by the Spring profile you use,
+# for example application-dev.yml if you use the "dev" profile.
+#
+# Standard Spring Boot properties.
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+
+eureka:
+    client:
+        enabled: true
+        healthcheck:
+            enabled: true
+        register-with-eureka: true
+        fetch-registry: true
+        instance-info-replication-interval-seconds: 10
+        registry-fetch-interval-seconds: 10
+    instance:
+        appname: podiumUaa
+        instanceId: podiumUaa:${spring.application.instance_id:${random.value}}
+        lease-renewal-interval-in-seconds: 5
+        lease-expiration-duration-in-seconds: 10
+        status-page-url-path: ${management.context-path}/info
+        health-check-url-path: ${management.context-path}/health
+        metadata-map:
+            profile: ${spring.profiles.active}
+            version: ${info.project.version}
+
+ribbon:
+    eureka:
+        enabled: true
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+
+management:
+    context-path: /management
+    security:
+        roles: PODIUM_ADMIN
+    health:
+        mail:
+            enabled: false # When using the MailService, configure an SMTP server and set this to true
+spring:
+    application:
+        name: podiumUaa
+    jackson:
+        serialization.write_dates_as_timestamps: false
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: none
+            naming:
+                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    messages:
+        basename: i18n/messages
+    mvc:
+        favicon:
+            enabled: false
+    thymeleaf:
+        mode: XHTML
+
+security:
+    basic:
+        enabled: false
+    oauth2:
+        resource:
+            filter-order: 3
+server:
+    session:
+        cookie:
+            http-only: true
+
+hazelcast:
+    phone:
+        home:
+            enabled: false
+
+# ===================================================================
+# Podium specific properties
+# ===================================================================
+
+podium:
+    async:
+        corePoolSize: 2
+        maxPoolSize: 50
+        queueCapacity: 10000
+    cors: #By default CORS are not enabled. Uncomment to enable.
+        allowed-origins: "*"
+        allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        allowed-headers: "*"
+        exposed-headers:
+        allow-credentials: true
+        max-age: 1800
+    mail:
+        from: podiumUaa@localhost
+    swagger:
+        title: podiumUaa API
+        description: podiumUaa API documentation
+        version: 0.0.7
+        termsOfServiceUrl:
+        contactName:
+        contactUrl: https://github.com/thehyve/podium
+        contactEmail:
+        license: Apache 2.0
+        licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.html
+    ribbon:
+        # comma separated list of profiles to show a ribbon on the GUI
+        displayOnActiveProfiles: dev
+
+uaa:
+    security:
+        activationKeyValiditySeconds: 604800 # One week in seconds

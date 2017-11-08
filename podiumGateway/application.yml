@@ -1,0 +1,137 @@
+# ===================================================================
+# Spring Boot configuration.
+#
+# This configuration will be overriden by the Spring profile you use,
+# for example application-dev.yml if you use the "dev" profile.
+#
+# More information on configuration properties: https://podium.github.io/common-application-properties/
+# Standard Spring Boot properties.
+#
+# Full reference is available at:
+# http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+# ===================================================================
+
+eureka:
+    client:
+        enabled: true
+        healthcheck:
+            enabled: true
+        register-with-eureka: true
+        fetch-registry: true
+        instance-info-replication-interval-seconds: 10
+        registry-fetch-interval-seconds: 10
+    instance:
+        appname: podiumGateway
+        instanceId: podiumGateway:${spring.application.instance_id:${random.value}}
+        lease-renewal-interval-in-seconds: 5
+        lease-expiration-duration-in-seconds: 10
+        status-page-url-path: ${management.context-path}/info
+        health-check-url-path: ${management.context-path}/health
+        metadata-map:
+            profile: ${spring.profiles.active}
+            version: ${info.project.version}
+
+ribbon:
+    eureka:
+        enabled: true
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.WeightedResponseTimeRule
+
+zuul:
+    host:
+        max-total-connections: 1000
+        max-per-route-connections: 100
+    semaphore:
+        max-semaphores: 500
+
+# See https://github.com/Netflix/Hystrix/wiki/Configuration
+hystrix:
+    command:
+        default:
+            execution:
+                isolation:
+                    thread:
+                        timeoutInMilliseconds: 10000
+
+management:
+    context-path: /management
+    security:
+        roles: PODIUM_ADMIN
+    health:
+        mail:
+            enabled: false # When using the MailService, configure an SMTP server and set this to true
+spring:
+    application:
+        name: podiumGateway
+    jackson:
+        serialization.write_dates_as_timestamps: false
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: none
+            naming:
+                physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+                implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    messages:
+        basename: i18n/messages
+    mvc:
+        favicon:
+            enabled: false
+    thymeleaf:
+        mode: XHTML
+    security:
+        client-authorization:
+            access-token-uri: http://podiumuaa/oauth/token
+            token-service-id: podiumuaa
+            client-id: internal
+            client-secret: internal
+security:
+    basic:
+        enabled: false
+    oauth2:
+        resource:
+            filter-order: 3
+
+server:
+    session:
+        cookie:
+            http-only: true
+
+hazelcast:
+    phone:
+        home:
+            enabled: false
+
+# ===================================================================
+# Podium specific properties
+#
+# Full reference is available at: https://podium.github.io/common-application-properties/
+# ===================================================================
+
+podium:
+    async:
+        core-pool-size: 2
+        max-pool-size: 50
+        queue-capacity: 10000
+    # By default CORS is disabled. Uncomment to enable.
+    cors:
+        allowed-origins: "*"
+        allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        allowed-headers: "*"
+        exposed-headers:
+        allow-credentials: true
+        max-age: 1800
+    mail:
+        from: podiumGateway@localhost
+    swagger:
+        default-include-pattern: /api/.*
+        title: podiumGateway API
+        description: podiumGateway API documentation
+        version: 0.0.1
+        terms-of-service-url:
+        contact-name:
+        contact-url: https://github.com/thehyve/podium
+        contact-email:
+        license: Apache 2.0
+        license-url: http://www.apache.org/licenses/LICENSE-2.0.html
+    ribbon:
+        display-on-active-profiles: dev
